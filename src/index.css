@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════════════════════════════
+   نظام التصميم — هوية بحرية صناعية لمركز تدريب ترسانة الإسكندرية
+   ═══════════════════════════════════════════════════════════════ */
+
+@layer base {
+  :root {
+    --brand:        #17386a;   /* كحلي بحري */
+    --brand-deep:   #0a1c38;
+    --brand-accent: #c8102e;   /* أحمر الشعار */
+    --brand-brass:  #c07314;   /* نحاسي/ذهبي */
+    --ring:         #2b60a8;
+  }
+
+  * { -webkit-tap-highlight-color: transparent; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    @apply bg-steel-50 text-navy-900 font-sans antialiased;
+    font-feature-settings: 'ss01' on, 'liga' on;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4 { @apply font-display font-bold text-navy-900 tracking-tight; }
+
+  /* حلقة التركيز — شرط إتاحة التنقل بلوحة المفاتيح */
+  :focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  ::selection { background: #17386a; color: #fff; }
+
+  /* شريط تمرير أنيق على المتصفحات الداعمة */
+  * { scrollbar-width: thin; scrollbar-color: #adb9cb transparent; }
+  *::-webkit-scrollbar { width: 10px; height: 10px; }
+  *::-webkit-scrollbar-thumb { background: #adb9cb; border-radius: 99px; border: 3px solid transparent; background-clip: content-box; }
+  *::-webkit-scrollbar-thumb:hover { background: #8494ac; background-clip: content-box; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* حاوية الصفحة */
+  .container-page { @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8; }
+
+  /* روابط التخطي — إتاحة */
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:fixed focus:top-3 focus:right-3 focus:z-[100]
+           focus:rounded-lg focus:bg-navy-800 focus:px-4 focus:py-2 focus:text-white;
+  }
+
+  /* بطاقة */
+  .card { @apply rounded-2xl border border-steel-200/80 bg-white shadow-card; }
+  .card-hover { @apply transition duration-300 hover:-translate-y-1 hover:shadow-lift hover:border-navy-200; }
+
+  /* نمط الخلفية الصناعية الخفيفة */
+  .bg-blueprint {
+    background-color: #0a1c38;
+    background-image:
+      linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px),
+      radial-gradient(1200px 600px at 85% -10%, rgba(43,96,168,.55), transparent 60%),
+      radial-gradient(900px 500px at 0% 110%, rgba(192,115,20,.25), transparent 60%);
+    background-size: 48px 48px, 48px 48px, 100% 100%, 100% 100%;
+  }
+
+  /* شريط علوي متدرج بألوان الهوية */
+  .brand-rule { background: linear-gradient(90deg, var(--brand-accent) 0%, var(--brand) 45%, var(--brand-brass) 100%); }
+
+  /* هيكل تحميل */
+  .skeleton { @apply relative overflow-hidden rounded-lg bg-steel-200/70; }
+  .skeleton::after {
+    content: ''; position: absolute; inset: 0;
+    transform: translateX(100%);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.65), transparent);
+    animation: shimmer 1.4s infinite;
+  }
+  @keyframes shimmer { 100% { transform: translateX(-100%); } }
+
+  /* نص متعدد الأسطر مقصوص */
+  .clamp-2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .clamp-3 { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+
+  /* محتوى نصي منسّق */
+  .prose-ar { @apply text-[15.5px] leading-[2] text-steel-700; }
+  .prose-ar p { @apply mb-4; }
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
