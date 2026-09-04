@@ -86,7 +86,11 @@ const router = createBrowserRouter([
       { path: 'coming-soon',      element: <ComingSoon /> },
     ],
   },
-]);
+], {
+  // مسار الأساس — يطابق base في vite.config حتى يعمل الموقع
+  // سواء على نطاق مستقل أو داخل مجلد فرعي (GitHub Pages)
+  basename: import.meta.env.BASE_URL.replace(/\/$/, '') || '/',
+});
 
 const queryClient = new QueryClient({
   defaultOptions: {
