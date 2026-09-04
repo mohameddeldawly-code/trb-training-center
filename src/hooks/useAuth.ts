@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+import type { Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
-import { fetchCurrentAdmin } from '@/data/api';
+import { fetchAdminByUserId } from '@/data/api';
 import type { AdminUser } from '@/types/db';
 
 export interface AuthState {
@@ -9,24 +10,37 @@ export interface AuthState {
   email: string | null;
 }
 
-/** حالة جلسة الإدارة — تُقرأ من Supabase Auth ثم يُتحقق من جدول admin_users */
+/**
+ * حالة جلسة الإدارة.
+ *
+ * ملاحظة مهمة: لا تُستدعى أي دالة من `supabase.auth` داخل معالج
+ * `onAuthStateChange` — فالمعالج يعمل داخل قفل المكتبة، واستدعاء
+ * `getSession()` أو `getUser()` بداخله يوقع النظام في حلقة تحديث
+ * لا نهائية ويمنع حفظ الجلسة. لذلك نعتمد على كائن الجلسة الممرَّر
+ * إلى المعالج، ونؤجّل أي عمل إضافي خارجه.
+ */
 export function useAuth(): AuthState {
   const [state, setState] = useState<AuthState>({ loading: true, admin: null, email: null });
 
   useEffect(() => {
     let alive = true;
 
-    const load = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (!alive) return;
-      if (!data.session) { setState({ loading: false, admin: null, email: null }); return; }
-      const admin = await fetchCurrentAdmin();
-      if (!alive) return;
-      setState({ loading: false, admin, email: data.session.user.email ?? null });
+    const resolve = async (session: Session | null) => {
+      if (!session?.user) {
+        if (alive) setState({ loading: false, admin: null, email: null });
+        return;
+      }
+      const admin = await fetchAdminByUserId(session.user.id);
+      if (alive) setState({ loading: false, admin, email: session.user.email ?? null });
     };
 
-    void load();
-    const { data: sub } = supabase.auth.onAuthStateChange(() => { void load(); });
+    void supabase.auth.getSession().then(({ data }) => resolve(data.session));
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      // التأجيل خارج قفل المكتبة
+      setTimeout(() => { void resolve(session); }, 0);
+    });
+
     return () => { alive = false; sub.subscription.unsubscribe(); };
   }, []);
 

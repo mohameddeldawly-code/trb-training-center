@@ -383,12 +383,15 @@ export async function uploadFile(bucket: 'media' | 'books' | 'attachments', file
 }
 
 /* ───────────────────────────── الإدارة والصلاحيات ───────────────────────────── */
-export async function fetchCurrentAdmin(): Promise<AdminUser | null> {
-  const { data: sess } = await supabase.auth.getUser();
-  if (!sess.user) return null;
-  const res = await supabase.from('admin_users').select('*').eq('user_id', sess.user.id).maybeSingle();
+/**
+ * قراءة سجل المدير بمعرّف المستخدم مباشرةً.
+ * لا تستدعي supabase.auth هنا — المعرّف يأتي من الجلسة التي بيد المُستدعي،
+ * وأي استدعاء لدوال المصادقة من داخل معالج تغيّر الحالة يسبب حلقة تحديث.
+ */
+export async function fetchAdminByUserId(userId: string): Promise<AdminUser | null> {
+  const res = await supabase.from('admin_users').select('*').eq('user_id', userId).maybeSingle();
   if (res.error) return null;
-  return res.data as AdminUser | null;
+  return (res.data as AdminUser | null) ?? null;
 }
 
 export async function fetchAdminUsers(): Promise<AdminUser[]> {
