@@ -1,12 +1,13 @@
-import { Suspense, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import {
   BarChart3, BookOpen, Building2, ClipboardList, FileSpreadsheet, Images, LayoutDashboard,
-  LogOut, Megaphone, Menu, MessageSquareWarning, PlayCircle, Rocket, ScrollText,
+  Clock, LogOut, Megaphone, Menu, MessageSquareWarning, PlayCircle, Rocket, ScrollText,
   Settings, ShieldCheck, Users, X, Newspaper, GraduationCap,
 } from 'lucide-react';
 import { useAuth, signOut } from '@/hooks/useAuth';
+import { measureClockSkew } from '@/lib/supabase';
 import { useSetting } from '@/hooks/useSettings';
 import { LoadingBlock } from '@/components/ui/States';
 import { Button } from '@/components/ui/Button';
@@ -58,7 +59,11 @@ export function AdminLayout() {
   const { loading, admin, email } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [skew, setSkew] = useState<number | null>(null);
   const logo = useSetting('center.logo_url', '/logo.png');
+
+  // فارق ساعة الجهاز عن ساعة الخادم — يُعرض كتنبيه إرشادي عند تعذّر الدخول
+  useEffect(() => { void measureClockSkew().then(setSkew); }, []);
 
   if (loading) return <LoadingBlock className="min-h-screen" label="جارٍ التحقق من الصلاحيات…" />;
 
@@ -73,6 +78,20 @@ export function AdminLayout() {
               ? 'حسابك مسجَّل لكنه غير مُضاف إلى مستخدمي لوحة الإدارة، أو تم إيقافه. راجع مدير النظام.'
               : 'يلزم تسجيل الدخول بحساب إداري للوصول إلى لوحة الإدارة.'}
           </p>
+
+          {skew !== null && Math.abs(skew) > 120 && (
+            <div className="mt-5 rounded-xl border border-brass-200 bg-brass-50 px-4 py-3 text-right">
+              <p className="flex items-center gap-2 text-[13.5px] font-bold text-brass-900">
+                <Clock className="h-4 w-4 shrink-0" aria-hidden />
+                ساعة هذا الجهاز غير مضبوطة
+              </p>
+              <p className="mt-1.5 text-[13px] leading-7 text-brass-800">
+                تفرق عن التوقيت الصحيح بمقدار {Math.abs(Math.round(skew / 60))} دقيقة تقريباً
+                {skew > 0 ? ' (متقدّمة)' : ' (متأخرة)'}، وهو ما قد يمنع استمرار جلسة الدخول.
+                اضبطها من: إعدادات Windows ▸ الوقت واللغة ▸ التاريخ والوقت ▸ «ضبط الوقت تلقائياً».
+              </p>
+            </div>
+          )}
           <div className="mt-6 flex justify-center gap-3">
             <Button onClick={() => navigate('/admin/login')}>تسجيل الدخول</Button>
             {email && <Button variant="secondary" onClick={() => void signOut()}>خروج</Button>}
