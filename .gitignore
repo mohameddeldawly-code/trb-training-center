@@ -7,3 +7,11 @@ dist
 .DS_Store
 .vite
 coverage
+
+# أدوات المزامنة المحلية (أسرار ونواتج تشغيل — لا تُرفع)
+tools/.env.sync
+tools/logs/
+tools/sync.config.json
+
+# موارد PDF.js تُنسخ آلياً عند البناء
+public/pdfjs/

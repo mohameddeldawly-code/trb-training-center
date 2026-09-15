@@ -21,7 +21,21 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- يُطبَّق الوضع قبل رسم الصفحة حتى لا يحدث وميض أبيض في الوضع الليلي -->
+    <script>
+      (function () {
+        try {
+          var c = localStorage.getItem('trb.theme') || 'system';
+          var d = c === 'dark' || (c === 'system' &&
+                  window.matchMedia('(prefers-color-scheme: dark)').matches);
+          var r = document.documentElement;
+          r.setAttribute('data-theme', d ? 'dark' : 'light');
+          r.style.colorScheme = d ? 'dark' : 'light';
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -1,33 +1,83 @@
 /** @type {import('tailwindcss').Config} */
+
+/* كل لون مرتبط بمتغيّر CSS حتى ينقلب النظام كاملاً بين الوضع النهاري والليلي
+   بتبديل قيم المتغيّرات فقط — بلا تكرار أي صنف في الكود. */
+const v = (name) => `rgb(var(${name}) / <alpha-value>)`;
+
+const scale = (prefix, keys) =>
+  Object.fromEntries(keys.map((k) => [k, v(`--${prefix}-${k}`)]));
+
+const FULL = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
+
 export default {
+  darkMode: ['class', '[data-theme="dark"]'],
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
       colors: {
-        // الهوية البصرية — مستلهمة من شعار ترسانة الإسكندرية (كحلي بحري · أحمر · ذهبي)
-        navy:   { 50:'#eef4fb',100:'#d6e5f5',200:'#adcaea',300:'#7ba7db',400:'#4a80c7',
-                  500:'#2b60a8',600:'#1f4a86',700:'#17386a',800:'#102a51',900:'#0a1c38',950:'#061125' },
-        steel:  { 50:'#f5f7fa',100:'#e9edf3',200:'#d3dae5',300:'#adb9cb',400:'#8494ac',
-                  500:'#647591',600:'#4f5e77',700:'#414d61',800:'#384252',900:'#323a47' },
-        ember:  { 50:'#fef2f3',100:'#fde3e5',200:'#fbccd1',300:'#f7a5ae',400:'#f17384',
-                  500:'#e6455d',600:'#c8102e',700:'#ab0f2a',800:'#8f1029',900:'#7a1228' },
-        brass:  { 50:'#fdf9ed',100:'#faf0cd',200:'#f4de9d',300:'#edc663',400:'#e7ad38',
-                  500:'#d9911c',600:'#c07314',700:'#9e5414',800:'#814317',900:'#6c3816' },
+        /* ── الهوية البصرية — كحلي بحري · أحمر الشعار · نحاسي ── */
+        navy:  scale('navy',  FULL),
+        steel: scale('steel', FULL),
+        ember: scale('ember', FULL),
+        brass: scale('brass', FULL),
+        emerald: scale('emerald', FULL),   // نجاح — متوافق مع الوضع الليلي
+
+        /* ── رموز دلالية: تنقلب تلقائياً مع الوضع الليلي ── */
+        surface:  v('--surface'),          // خلفية البطاقات واللوحات
+        'surface-2': v('--surface-2'),     // خلفية فرعية/مرتفعة
+        'surface-3': v('--surface-3'),     // خلفية غائرة (حقول، أشرطة)
+        canvas:   v('--canvas'),           // خلفية الصفحة
+        ink:      v('--ink'),              // نص أساسي
+        'ink-2':  v('--ink-2'),            // نص ثانوي
+        muted:    v('--muted'),            // نص خافت
+        line:     v('--line'),             // حدود
+        'line-2': v('--line-2'),           // حدود أوضح
+        accent:   v('--accent'),           // لون التفاعل الأساسي
+        'accent-soft': v('--accent-soft'),
       },
       fontFamily: {
-        sans: ['"IBM Plex Sans Arabic"','"Noto Kufi Arabic"','system-ui','-apple-system','Segoe UI','sans-serif'],
-        display: ['"Cairo"','"IBM Plex Sans Arabic"','system-ui','sans-serif'],
+        sans:    ['"IBM Plex Sans Arabic"', '"Noto Kufi Arabic"', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+        display: ['"Cairo"', '"IBM Plex Sans Arabic"', 'system-ui', 'sans-serif'],
+        mono:    ['"IBM Plex Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+      },
+      fontSize: {
+        '2xs': ['11px', { lineHeight: '1.6' }],
       },
       boxShadow: {
-        card: '0 1px 2px rgba(10,28,56,.04), 0 8px 24px -12px rgba(10,28,56,.18)',
-        lift: '0 2px 4px rgba(10,28,56,.05), 0 18px 40px -18px rgba(10,28,56,.28)',
+        card:  'var(--shadow-card)',
+        lift:  'var(--shadow-lift)',
+        float: 'var(--shadow-float)',
+        glow:  '0 0 0 1px rgb(var(--accent) / .18), 0 12px 34px -14px rgb(var(--accent) / .45)',
+        inner_soft: 'inset 0 1px 0 rgb(255 255 255 / .06)',
       },
-      borderRadius: { xl: '0.875rem', '2xl': '1.125rem', '3xl': '1.5rem' },
+      borderRadius: {
+        lg: '0.625rem', xl: '0.875rem', '2xl': '1.125rem', '3xl': '1.5rem', '4xl': '2rem',
+      },
+      spacing: { 18: '4.5rem', 22: '5.5rem' },
+      transitionTimingFunction: {
+        smooth: 'cubic-bezier(.22,1,.36,1)',
+        snap:   'cubic-bezier(.34,1.56,.64,1)',
+      },
+      backgroundImage: {
+        'brand-sheen': 'linear-gradient(120deg, rgb(var(--navy-800)) 0%, rgb(var(--navy-600)) 50%, rgb(var(--navy-900)) 100%)',
+        'gold-line':   'linear-gradient(90deg, transparent, rgb(var(--brass-400)), transparent)',
+      },
       keyframes: {
-        'fade-up': { '0%': { opacity:'0', transform:'translateY(10px)' }, '100%': { opacity:'1', transform:'none' } },
-        shimmer: { '100%': { transform: 'translateX(-100%)' } },
+        'fade-up':   { '0%': { opacity: '0', transform: 'translateY(14px)' }, '100%': { opacity: '1', transform: 'none' } },
+        'fade-in':   { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+        'scale-in':  { '0%': { opacity: '0', transform: 'scale(.96)' }, '100%': { opacity: '1', transform: 'none' } },
+        shimmer:     { '100%': { transform: 'translateX(-100%)' } },
+        'float-y':   { '0%,100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-8px)' } },
+        'pulse-ring':{ '0%': { transform: 'scale(.9)', opacity: '.7' }, '100%': { transform: 'scale(1.6)', opacity: '0' } },
+        marquee:     { '0%': { transform: 'translateX(0)' }, '100%': { transform: 'translateX(100%)' } },
       },
-      animation: { 'fade-up': 'fade-up .45s cubic-bezier(.22,1,.36,1) both' },
+      animation: {
+        'fade-up':  'fade-up .55s cubic-bezier(.22,1,.36,1) both',
+        'fade-in':  'fade-in .4s ease both',
+        'scale-in': 'scale-in .35s cubic-bezier(.22,1,.36,1) both',
+        'float-y':  'float-y 6s ease-in-out infinite',
+        'pulse-ring': 'pulse-ring 2s cubic-bezier(.22,1,.36,1) infinite',
+      },
     },
   },
   plugins: [],
